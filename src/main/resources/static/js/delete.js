@@ -22,7 +22,7 @@ $(function() {
         e.preventDefault();
 
         $.post("/service/logout", function(){
-            window.location = window.location.href.split("/")[0] + "/index.html";
+            window.location = window.location.href.split("/")[0] + "/";
         });
     });
 

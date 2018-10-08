@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserRepo {
 
@@ -13,20 +15,34 @@ public class UserRepo {
         this.connection = connection;
     }
 
-    public void addName(String firstname, String password) throws Exception {
+    public void addName(String username, String password) throws Exception {
         final String query = "insert into users values (?, ?)";
         final PreparedStatement stmt = connection.prepareStatement(query);
-        stmt.setString(1, firstname);
+        stmt.setString(1, username);
         stmt.setString(2, password);
         stmt.execute();
     }
 
-    public String login(String username, String password) {
-        final String query = "select * from users where username = '" + username + "' and password = '" + password + "'";
+    public List<String> allUsers() throws SQLException {
+        List<String> vendors = new ArrayList<>();
+        final String query = "select username from users";
+        final ResultSet resultSet = connection.prepareStatement(query).executeQuery();
+        while(resultSet.next()){
+            vendors.add(resultSet.getString("username"));
+        }
+        return vendors;
+    }
 
-        final ResultSet resultSet;
+    public String login(String username, String password) {
         try {
-            resultSet = connection.createStatement().executeQuery(query);
+            final String query = "select * from users where username = ? and password = ?";
+
+            final PreparedStatement stmt = connection.prepareStatement(query);
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+
+            final ResultSet resultSet;
+            resultSet = stmt.executeQuery();
             resultSet.next();
             return resultSet.getString("username");
         } catch (SQLException e) {

@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.List;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -32,6 +33,21 @@ public class UserRepoTest {
         assertEquals(getUserCount(conn), 2);
     }
 
+    @Test
+    public void all_users_should_return_names_from_the_database() throws Exception {
+        // Given
+        UserRepo repo = new UserRepo(conn);
+        repo.addName("Alice", "password");
+        repo.addName("Bob", "password");
+
+        // When
+        List<String> users = repo.allUsers();
+
+        // Then
+        assertEquals(2, users.size());
+        assertTrue(users.contains("Alice"));
+        assertTrue(users.contains("Bob"));
+    }
 
     @Test
     public void login_should_work_for_existing_user() throws Exception {
