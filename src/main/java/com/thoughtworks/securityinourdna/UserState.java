@@ -2,13 +2,13 @@ package com.thoughtworks.securityinourdna;
 
 public class UserState {
 
-    private boolean loggedIn;
+    private boolean adminLoggedIn;
 
-    public UserState(boolean loggedIn) {
-        this.loggedIn = loggedIn;
+    public UserState(boolean adminLoggedIn) {
+        this.adminLoggedIn = adminLoggedIn;
     }
 
-    public boolean isLoggedIn() {
-        return loggedIn;
+    public boolean isAdminLoggedIn() {
+        return adminLoggedIn;
     }
 }

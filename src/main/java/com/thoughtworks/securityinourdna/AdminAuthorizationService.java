@@ -13,11 +13,12 @@ public class AdminAuthorizationService {
         this.userRepo = userRepo;
     }
 
-    public boolean loginAsAdmin(final String username, final String password) {
+    public LoginResult loginAsAdmin(final String username, final String password) {
         try {
-            return userRepo.login(username, password).equals("admin");
+            String user = userRepo.login(username, password);
+            return user.equals("admin") ? LoginResult.ADMIN : LoginResult.REGULAR;
         } catch (InvalidCredentials e){
-            return false;
+            return LoginResult.FAILED;
         }
     }
 }

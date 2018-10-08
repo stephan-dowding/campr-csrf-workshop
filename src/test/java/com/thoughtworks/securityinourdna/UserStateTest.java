@@ -10,6 +10,6 @@ public class UserStateTest {
     public void shouldStoreLoggedInState() {
         final UserState userState = new UserState(true);
 
-        assertThat(userState.isLoggedIn(), is(true));
+        assertThat(userState.isAdminLoggedIn(), is(true));
     }
 }

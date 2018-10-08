@@ -3,7 +3,6 @@ package com.thoughtworks.securityinourdna;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 
@@ -36,6 +35,6 @@ public class VendorPortalController {
 
     private boolean loggedIn(HttpSession session) {
         final UserState userState = (UserState) session.getAttribute("userState");
-        return userState != null && userState.isLoggedIn();
+        return userState != null && userState.isAdminLoggedIn();
     }
 }

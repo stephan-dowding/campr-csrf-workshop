@@ -28,17 +28,19 @@ public class UserStateController {
                                 @RequestParam(value = "password") String password,
                                 HttpSession session, HttpServletResponse response) {
 
-        final boolean loggedIn = adminAuthorizationService.loginAsAdmin(username, password);
+        final LoginResult loggedIn = adminAuthorizationService.loginAsAdmin(username, password);
 
-        final UserState userState = new UserState(loggedIn);
+        final UserState userState = new UserState(loggedIn==LoginResult.ADMIN);
         session.setAttribute("userState", userState);
 
-        if (loggedIn) {
+        if (loggedIn == LoginResult.ADMIN) {
             response.addCookie(new Cookie("csrfToken", generateCSRFToken()));
             return "admin.html";
-        } else {
-            return "Sorry! There is something wrong with your username and password combination.";
         }
+        if (loggedIn == LoginResult.REGULAR) {
+            return "vendorhome.html";
+        }
+        return "Sorry! There is something wrong with your username and password combination.";
     }
 
     private String generateCSRFToken() {
