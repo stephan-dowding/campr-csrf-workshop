@@ -1,15 +1,11 @@
 package com.thoughtworks.securityinourdna;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.security.SecureRandom;
 import java.sql.SQLException;
 
 @Controller
@@ -27,5 +23,13 @@ public class HomeController {
     public String home(Model model) throws SQLException {
         model.addAttribute("users", userRepo.allUsers());
         return "home";
+    }
+
+    @GetMapping("/vendor")
+    public String vendor(final HttpSession session) {
+        if (session.getAttribute("userState") != null) {
+            return "vendor";
+        }
+        return "redirect:/";
     }
 }

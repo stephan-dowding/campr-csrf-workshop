@@ -37,7 +37,9 @@
 <body>
 
 <div class="container">
-
+    <div th:if="${error != null}">
+        <h3 th:text="${error}" />
+    </div>
     <div id="login" class="">
         <form class="form-signin" action="/login" method="post">
             <select class="form-control" name="username" placeholder="username">
