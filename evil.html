@@ -4,11 +4,13 @@
 </head>
 <body>
 
-<form action="http://localhost:8080/vendor/delete/admin" method="POST">
-  <input style="font-size: 36pt" type="submit" value="Click if you think I'm cute!!! :D">
+<form action="http://localhost:8080/admin/deleteVendor" method="POST">
+    <input type="hidden" name="vendor" value="admin" />
+    <input type="hidden" name="csrfToken" value="dontKnow" />
+    <input style="font-size: 36pt" type="submit" value="Click if you think I'm cute!!! :D" />
 </form>
 
-<img src="cute_kitten_ducklings.jpg" style="max-width: 100%">
+<img src="cute_kitten_ducklings.jpg" style="max-width: 100%" />
 
 </body>
 </html>

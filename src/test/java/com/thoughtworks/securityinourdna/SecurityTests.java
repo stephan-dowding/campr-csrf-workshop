@@ -1,87 +1,67 @@
 package com.thoughtworks.securityinourdna;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.Mock;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.DEFINED_PORT;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = VendorPortalApplication.class, webEnvironment=DEFINED_PORT)
 public class SecurityTests {
-    private final int HTTP_UNAUTHORIZED = 401;
-    private final int HTTP_BAD_REQUEST = 400;
-    private final int HTTP_OK = 200;
 
-    @Test
-    public void admin_should_delete_user_with_csrf_token() throws Exception {
-        // Given
-        final BasicCookieStore cookieStore = new BasicCookieStore();
-        loginAsAdmin(cookieStore);
+    @Mock
+    private UserRepo userRepo;
 
-        String csrfToken = null;
-        for (Cookie c : cookieStore.getCookies()) {
-            if (c.getName().equals("csrfToken")) {
-                csrfToken = c.getValue();
-                break;
-            }
-        }
+    private MockMvc mockMvc;
 
-        // When
-        int status = postToDeleteVendor(cookieStore, csrfToken);
-
-        // Then
-        assertThat(status, is(HTTP_OK));
+    @Before
+    public void setup() {
+        initMocks(this);
+        AdminController controller = new AdminController(userRepo);
+        this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @Test
-    public void admin_cannot_delete_user_with_incorrect_csrf_token() throws Exception {
-        // Given
-        BasicCookieStore cookieStore = new BasicCookieStore();
-        loginAsAdmin(cookieStore);
+    public void admin_should_delete_vendor_with_csrf_token() throws Exception {
+        mockMvc.perform(
+                post("/admin/deleteVendor")
+                .sessionAttr("csrfToken", "validToken")
+                .sessionAttr("userState", new UserState(true))
+                .param("vendor", "deleteMe")
+                .param("csrfToken", "validToken")
+        ).andExpect(status().isFound());
 
-        // When
-        int status = postToDeleteVendor(cookieStore, "incorrect!");
-
-        // Then
-        assertThat(status, is(HTTP_UNAUTHORIZED));
+        verify(userRepo).delete("deleteMe");
     }
 
+    @Test
+    public void admin_cannot_delete_vendor_with_incorrect_csrf_token() throws Exception {
+        mockMvc.perform(
+                post("/admin/deleteVendor")
+                        .sessionAttr("csrfToken", "validToken")
+                        .sessionAttr("userState", new UserState(true))
+                        .param("vendor", "deleteMe")
+                        .param("csrfToken", "wrong")
+        ).andExpect(status().isUnauthorized());
 
-    private void loginAsAdmin(BasicCookieStore cookieStore) throws Exception {
-        CloseableHttpClient httpclient = HttpClients.custom()
-                .setDefaultCookieStore(cookieStore)
-                .build();
-
-        RequestBuilder request = RequestBuilder.post("http://localhost:8080/session")
-                .addParameter("username", "admin")
-                .addParameter("password", "admin");
-
-        httpclient.execute(request.build());
+        verify(userRepo, never()).delete("deleteMe");
     }
 
-    private int postToDeleteVendor(BasicCookieStore cookieStore, String maybeCsrfCookieValue) throws Exception {
-        CloseableHttpClient httpclient = HttpClients.custom()
-                .setDefaultCookieStore(cookieStore)
-                .build();
+    @Test
+    public void non_admin_cannot_delete_vendor() throws Exception {
+        mockMvc.perform(
+                post("/admin/deleteVendor")
+                        .sessionAttr("csrfToken", "validToken")
+                        .sessionAttr("userState", new UserState(false))
+                        .param("vendor", "deleteMe")
+                        .param("csrfToken", "validToken")
+        ).andExpect(status().isUnauthorized());
 
-        RequestBuilder request = RequestBuilder.post("http://localhost:8080/vendor/delete/Recycling");
-
-        if (maybeCsrfCookieValue != null) {
-            request.addParameter("csrfToken", maybeCsrfCookieValue);
-        }
-
-        final CloseableHttpResponse response = httpclient.execute(request.build());
-
-        return response.getStatusLine().getStatusCode();
+        verify(userRepo, never()).delete("deleteMe");
     }
 }
